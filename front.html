@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>unsent &lt;3</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #050505;
+        min-height: 100vh;
+        font-family: "Georgia", "Times New Roman", serif;
+        overflow: hidden;
+      }
+
+      .envelope-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #050505;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        cursor: pointer;
+        transition: opacity 1s ease;
+      }
+
+      .envelope-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .envelope-text {
+        text-align: center;
+        margin-top: 2rem;
+      }
+
+      .main-quote {
+        font-size: 1.3rem;
+        letter-spacing: 1px;
+        color: #d6c8ae;
+        font-style: italic;
+        margin-bottom: 24px;
+        font-weight: 300;
+      }
+
+      .tap-text {
+        font-size: 0.7rem;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        color: #6a5e48;
+      }
+
+      .envelope-wrap {
+        position: relative;
+        width: 340px;
+        height: 230px;
+        perspective: 900px;
+      }
+
+      .env-body {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 340px;
+        height: 200px;
+        background: #7a6e58;
+        border-radius: 4px 4px 6px 6px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+      }
+
+      .env-body::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 200px 170px 0 0;
+        border-color: #6b6050 transparent transparent transparent;
+      }
+
+      .env-body::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 200px 0 0 170px;
+        border-color: #5e5447 transparent transparent transparent;
+      }
+
+      .env-bottom {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 340px;
+        height: 120px;
+        overflow: hidden;
+        z-index: 2;
+      }
+
+      .env-bottom::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 0 120px 170px;
+        border-color: transparent transparent #8c7e66 transparent;
+      }
+
+      .env-bottom::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 170px 120px 0;
+        border-color: transparent #8c7e66 transparent transparent;
+      }
+
+      .env-flap {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 340px;
+        height: 140px;
+        overflow: hidden;
+        z-index: 10;
+        transform-origin: top center;
+        transform: rotateX(0deg);
+        transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+      }
+
+      .env-flap::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 140px 170px 0 170px;
+        border-color: #877862 transparent transparent transparent;
+      }
+
+      .env-flap::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 140px 170px 0 170px;
+        border-color: #c8bfa8 transparent transparent transparent;
+        transform: rotateX(180deg);
+        backface-visibility: visible;
+      }
+
+      .envelope-screen.opening .env-flap {
+        transform: rotateX(-175deg);
+      }
+
+      .env-seal {
+        position: absolute;
+        left: 50%;
+        bottom: 82px;
+        transform: translateX(-50%);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 38% 32%,
+          #c94f3a,
+          #9e2e1c 60%,
+          #6b1a0e
+        );
+        box-shadow:
+          0 3px 12px rgba(0, 0, 0, 0.55),
+          inset 0 1px 2px rgba(255, 180, 160, 0.25);
+        z-index: 11;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.4s ease,
+          opacity 0.4s ease;
+      }
+
+      .env-seal::after {
+        content: "✦";
+        color: rgba(255, 220, 200, 0.7);
+        font-size: 1.1rem;
+        line-height: 1;
+      }
+
+      .envelope-screen.opening .env-seal {
+        transform: translateX(-50%) scale(0.7);
+        opacity: 0;
+      }
+
+      .transition-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #050505;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 900;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.6s ease;
+      }
+
+      .transition-overlay.show {
+        opacity: 1;
+      }
+
+      .transition-text {
+        color: #d6c8ae;
+        font-size: 0.9rem;
+        letter-spacing: 3px;
+        font-style: italic;
+      }
+
+      .app-container {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+        opacity: 0;
+        transition: opacity 1s ease;
+        height: 100vh;
+        overflow-y: auto;
+      }
+
+      .app-container.visible {
+        opacity: 1;
+      }
+
+      .brand {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+
+      .brand h1 {
+        font-size: 3.5rem;
+        font-weight: 400;
+        letter-spacing: 3px;
+        color: #e0d4be;
+        margin-bottom: 0.5rem;
+      }
+
+      .brand .tagline {
+        font-size: 1.3rem;
+        color: #a09273;
+        font-style: italic;
+      }
+
+      .brand .ritual {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: #5a4e38;
+        margin-top: 1rem;
+      }
+
+      .letter-paper {
+        position: relative;
+        background: #0d0c0a;
+        border: 1px solid #2c2820;
+        border-radius: 28px;
+        padding: 1.8rem;
+        margin: 1.5rem 0;
+        overflow: hidden;
+        box-shadow:
+          0 2px 0 #1c1a15,
+          0 4px 0 #161410,
+          0 6px 0 #111008,
+          0 12px 32px rgba(0, 0, 0, 0.6),
+          inset 0 0 60px rgba(0, 0, 0, 0.15);
+        transform: perspective(1000px) rotateX(0.4deg) rotateY(-0.2deg);
+      }
+
+      .letter-paper::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 28px;
+        pointer-events: none;
+        z-index: 1;
+        background:
+          linear-gradient(
+            135deg,
+            transparent 42%,
+            rgba(255, 245, 210, 0.018) 43.2%,
+            rgba(0, 0, 0, 0.03) 44%,
+            transparent 45.5%
+          ),
+          linear-gradient(
+            180deg,
+            transparent 52%,
+            rgba(0, 0, 0, 0.025) 53.2%,
+            rgba(255, 245, 210, 0.015) 54%,
+            transparent 55.5%
+          ),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='350' height='350'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='350' height='350' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
+        mix-blend-mode: screen;
+      }
+
+      .letter-paper::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 28px;
+        pointer-events: none;
+        z-index: 1;
+        background:
+          radial-gradient(
+            ellipse at 50% 50%,
+            transparent 55%,
+            rgba(0, 0, 0, 0.28) 100%
+          ),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.14) 0%, transparent 12%),
+          linear-gradient(270deg, rgba(0, 0, 0, 0.1) 0%, transparent 10%),
+          linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, transparent 9%),
+          linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0%, transparent 9%);
+      }
+
+      .letter-paper > * {
+        position: relative;
+        z-index: 2;
+      }
+
+      .to-line {
+        margin-bottom: 1.2rem;
+      }
+
+      .to-label {
+        font-family: monospace;
+        font-size: 0.65rem;
+        letter-spacing: 3px;
+        color: #9e8a60;
+      }
+
+      .suggestion {
+        font-size: 1rem;
+        font-style: italic;
+        color: #b89a60;
+        margin: 0.3rem 0 0.5rem;
+        min-height: 2rem;
+        transition: opacity 0.25s;
+      }
+
+      .greeting {
+        font-size: 1rem;
+        color: #cbbd9a;
+        border-bottom: 1px solid #2a251d;
+        display: inline-flex;
+        align-items: baseline;
+        padding-bottom: 3px;
+      }
+
+      .dear-name-input {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #4a4030;
+        color: #cbbd9a;
+        font-family: "Georgia", serif;
+        font-size: 1rem;
+        width: 160px;
+        outline: none;
+        padding-bottom: 2px;
+        caret-color: #b58f50;
+      }
+
+      .dear-name-input::placeholder {
+        color: #4d4333;
+        font-style: italic;
+      }
+
+      textarea {
+        width: 100%;
+        background: #111009;
+        border: 1px solid #2e2921;
+        border-radius: 20px;
+        padding: 1.2rem;
+        font-family: "Georgia", serif;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #e0d2bc;
+        resize: vertical;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #a8864c;
+        background: #181612;
+      }
+
+      textarea::placeholder {
+        color: #4d4333;
+        font-style: italic;
+      }
+
+      .button-wrap {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1.2rem;
+      }
+
+      .send-btn {
+        background: transparent;
+        border: 1px solid #554b38;
+        padding: 0.7rem 1.8rem;
+        font-family: monospace;
+        font-size: 0.7rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #caba92;
+        cursor: pointer;
+        border-radius: 40px;
+        transition: 0.2s;
+      }
+
+      .send-btn:hover {
+        border-color: #b89050;
+        background: rgba(180, 140, 70, 0.05);
+      }
+
+      .send-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .response-area {
+        margin-top: 1.8rem;
+        border-top: 1px solid #221f19;
+        padding-top: 1.5rem;
+        display: none;
+      }
+
+      .response-area.show {
+        display: block;
+      }
+
+      .witness-reply {
+        background: #0c0b09;
+        border-left: 3px solid #b58f50;
+        padding: 1rem 1.3rem;
+        font-family: "Georgia", serif;
+        font-size: 1rem;
+        line-height: 1.55;
+        color: #daceb5;
+        font-style: italic;
+      }
+
+      .disappear-note {
+        font-family: monospace;
+        font-size: 0.6rem;
+        text-align: right;
+        color: #7a6a4a;
+        margin-top: 0.8rem;
+      }
+
+      .loading {
+        text-align: right;
+        font-family: monospace;
+        font-size: 0.65rem;
+        color: #a07d48;
+        display: none;
+        margin-top: 0.5rem;
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1em;
+        background: #b58f50;
+        margin-left: 3px;
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+
+      @media (max-width: 550px) {
+        .brand h1 { font-size: 2.5rem; }
+        .brand .tagline { font-size: 1rem; }
+        .letter-paper { padding: 1.2rem; border-radius: 20px; }
+        .envelope-wrap { width: 280px; height: 190px; }
+        .env-body { width: 280px; }
+        .env-flap::before,
+        .env-flap::after { border-width: 115px 140px 0 140px; }
+        .env-bottom::before { border-width: 0 0 100px 140px; }
+        .env-bottom::after { border-width: 0 140px 100px 0; }
+        .env-body::before { border-width: 160px 140px 0 0; }
+        .env-body::after { border-width: 160px 0 0 140px; }
+        .env-seal { bottom: 65px; width: 40px; height: 40px; }
+        .dear-name-input { width: 120px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="envelope-screen" id="envelopeScreen">
+      <div class="envelope-wrap">
+        <div class="env-body">
+          <div class="env-bottom"></div>
+        </div>
+        <div class="env-flap"></div>
+        <div class="env-seal"></div>
+      </div>
+      <div class="envelope-text">
+        <div class="main-quote">Some words never found a place to go.</div>
+        <div class="tap-text">TAP TO OPEN</div>
+      </div>
+    </div>
+
+    <div class="transition-overlay" id="transitionOverlay">
+      <div class="transition-text">✧</div>
+    </div>
+
+    <div class="app-container" id="appContainer">
+      <div class="brand">
+        <h1>UNSENT</h1>
+        <div class="tagline">Say it. Once.</div>
+        <div class="ritual">
+          Write what you couldn't say. It listens once, then forgets.
+        </div>
+      </div>
+
+      <div class="letter-paper" id="letterPaper">
+        <div class="to-line">
+          <div class="to-label">TO</div>
+          <div class="suggestion" id="suggestionText">To someone you lost</div>
+          <div class="greeting">Dear <input type="text" id="dearName" class="dear-name-input" maxlength="40"/>,</div>
+        </div>
+        <textarea
+          id="letterContent"
+          rows="6"
+          placeholder="Start here.&#10;&#10;The apology. The anger. The goodbye. The truth."
+        ></textarea>
+        <div class="button-wrap">
+          <button class="send-btn" id="sendBtn">Send Into The Dark</button>
+        </div>
+        <div class="loading" id="loading">witness listens...</div>
+      </div>
+
+      <div class="response-area" id="responseArea">
+        <div class="witness-reply" id="witnessReply"></div>
+        <div class="disappear-note" id="disappearNote"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const envelopeScreen = document.getElementById("envelopeScreen");
+        const transitionOverlay = document.getElementById("transitionOverlay");
+        const appContainer = document.getElementById("appContainer");
+        const suggestionSpan = document.getElementById("suggestionText");
+        const letterTextarea = document.getElementById("letterContent");
+        const dearNameInput = document.getElementById("dearName");
+        const sendBtn = document.getElementById("sendBtn");
+        const loadingSpan = document.getElementById("loading");
+        const responseArea = document.getElementById("responseArea");
+        const witnessReplyDiv = document.getElementById("witnessReply");
+        const disappearNote = document.getElementById("disappearNote");
+
+        let isStreaming = false;
+        let typeInterval = null;
+
+        const suggestions = [
+          "To someone you lost",
+          "To someone who hurt you",
+          "To someone you still love",
+          "To someone you never forgave",
+          "To the version of yourself you miss",
+          "To yourself",
+          "To no one in particular",
+        ];
+        let idx = 0;
+
+        function rotateSuggestion() {
+          if (!suggestionSpan) return;
+          suggestionSpan.style.opacity = "0";
+          setTimeout(() => {
+            idx = (idx + 1) % suggestions.length;
+            suggestionSpan.innerText = suggestions[idx];
+            suggestionSpan.style.opacity = "1";
+          }, 250);
+        }
+        setInterval(rotateSuggestion, 3200);
+
+        function openApp() {
+          envelopeScreen.classList.add("opening");
+          setTimeout(() => {
+            transitionOverlay.classList.add("show");
+            setTimeout(() => {
+              envelopeScreen.classList.add("fade-out");
+              setTimeout(() => {
+                envelopeScreen.style.display = "none";
+                transitionOverlay.classList.remove("show");
+                appContainer.classList.add("visible");
+                dearNameInput.focus();
+              }, 500);
+            }, 300);
+          }, 950);
+        }
+
+        envelopeScreen.addEventListener("click", openApp);
+
+        async function getWitnessResponse(letter) {
+          const res = await fetch("http://localhost:8080/submit", {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: letter
+          });
+          if (!res.ok) return "It heard you.";
+          return await res.text();
+        }
+
+        function stopTypewriter() {
+          if (typeInterval) {
+            clearInterval(typeInterval);
+            typeInterval = null;
+          }
+        }
+
+        function typewrite(element, text, speed, callback) {
+          stopTypewriter();
+          element.innerHTML = "";
+          let i = 0;
+          const cursor = document.createElement("span");
+          cursor.className = "cursor";
+          element.appendChild(cursor);
+          typeInterval = setInterval(() => {
+            if (i < text.length) {
+              element.insertBefore(document.createTextNode(text[i]), cursor);
+              i++;
+            } else {
+              if (cursor.parentNode) cursor.remove();
+              clearInterval(typeInterval);
+              typeInterval = null;
+              if (callback) callback();
+            }
+          }, speed || 30);
+        }
+
+        sendBtn.addEventListener("click", async () => {
+          if (isStreaming) return;
+
+          const name = dearNameInput.value.trim() || "…";
+          const body = letterTextarea.value.trim();
+
+          if (!body) {
+            const warn = document.createElement("div");
+            warn.className = "disappear-note";
+            warn.style.color = "#a07d48";
+            warn.innerText = "✧ write what couldn't be said ✧";
+            document.querySelector(".button-wrap").appendChild(warn);
+            setTimeout(() => warn.remove(), 2000);
+            return;
+          }
+
+          const letter = `Dear ${name},\n\n${body}`;
+
+          isStreaming = true;
+          sendBtn.disabled = true;
+          loadingSpan.style.display = "block";
+          responseArea.classList.remove("show");
+
+          let response;
+          try {
+            response = await getWitnessResponse(letter);
+          } catch (e) {
+            response = "It heard you.";
+          }
+
+          dearNameInput.value = "";
+          letterTextarea.value = "";
+
+          setTimeout(() => {
+            loadingSpan.style.display = "none";
+            responseArea.classList.add("show");
+            typewrite(witnessReplyDiv, response, 30, () => {
+              disappearNote.innerText = "✧ You were heard. Letter dissolving... ✧";
+              setTimeout(() => {
+                disappearNote.innerText = "✧ No copy was kept. This letter never existed. ✧";
+              }, 1200);
+            });
+            isStreaming = false;
+            sendBtn.disabled = false;
+          }, 500);
+        });
+      })();
+    </script>
+  </body>
+</html>
