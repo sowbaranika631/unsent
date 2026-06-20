@@ -1,6 +1,12 @@
 local socket = require("socket")
 local env = require("luasql.sqlite3")
 
+-- Gemini API key from environment
+local GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY then
+  print("[WARN] GEMINI_API_KEY not set — Gemini calls will fail when integrated")
+end
+
 -- SQLite setup
 local db_env = env.sqlite3()
 local conn = db_env:connect("unsent.db")
@@ -43,12 +49,10 @@ local function parse_request(client)
   local headers = {}
   local content_length = 0
 
-  -- Read request line
   local line = client:receive("*l")
   if not line then return nil end
   method, path = line:match("^(%u+)%s+(%S+)")
 
-  -- Read headers
   while true do
     line = client:receive("*l")
     if not line or line == "" or line == "\r" then break end
@@ -67,11 +71,26 @@ local function parse_request(client)
   return method, path, body
 end
 
--- Send HTTP response
+-- Send plain text HTTP response
 local function send_response(client, status, body)
   local response = table.concat({
     "HTTP/1.1 " .. status,
     "Content-Type: text/plain",
+    "Content-Length: " .. #body,
+    "Access-Control-Allow-Origin: *",
+    "Access-Control-Allow-Methods: POST, OPTIONS",
+    "Access-Control-Allow-Headers: Content-Type",
+    "",
+    body
+  }, "\r\n")
+  client:send(response)
+end
+
+-- Send JSON HTTP response
+local function send_json(client, status, body)
+  local response = table.concat({
+    "HTTP/1.1 " .. status,
+    "Content-Type: application/json",
     "Content-Length: " .. #body,
     "Access-Control-Allow-Origin: *",
     "Access-Control-Allow-Methods: POST, OPTIONS",
@@ -100,24 +119,24 @@ while true do
 
     elseif method == "POST" and path == "/submit" then
       if not body or body:gsub("%s+", "") == "" then
-        send_response(client, "400 Bad Request", "empty letter")
+        send_json(client, "400 Bad Request", '{"response":"empty letter"}')
       else
-        -- Insert → trigger fires → row is gone
         local ok, err = conn:execute(
           string.format("INSERT INTO letters (body) VALUES (%q)", body)
         )
         if ok then
           print(string.format("[%s] letter received — %d chars — deleted by trigger",
             os.date("%H:%M:%S"), #body))
-          send_response(client, "200 OK", "witnessed")
+          -- P3 will replace this line with the Gemini call
+          send_json(client, "200 OK", '{"response":"witnessed"}')
         else
           print("[ERROR] DB insert failed: " .. tostring(err))
-          send_response(client, "500 Internal Server Error", "It heard you.")
+          send_json(client, "500 Internal Server Error", '{"response":"It heard you."}')
         end
       end
 
     else
-      send_response(client, "404 Not Found", "not found")
+      send_json(client, "404 Not Found", '{"response":"not found"}')
     end
 
     client:close()
