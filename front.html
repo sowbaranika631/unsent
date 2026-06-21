@@ -434,10 +434,6 @@
         top: 66.6%;
       }
 
-      .letter-emerge.unfolding-h {
-        height: min(80vh, 760px);
-      }
-
       .letter-emerge.unfolding-h .crease {
         opacity: 1;
       }
@@ -533,13 +529,15 @@
         position: relative;
         flex: 1;
         min-height: 320px;
+        background: rgba(250, 242, 225, 0.15);
+        border-radius: 4px;
       }
 
       .letter-body {
         width: 100%;
         height: 100%;
         min-height: 320px;
-        background: rgba(250, 242, 225, 0.3);
+        background: transparent;
         border: none;
         resize: none;
         font-family: var(--body);
@@ -550,11 +548,13 @@
         border-radius: 4px;
         font-weight: 500;
         overflow-y: auto;
+        position: relative;
+        z-index: 5;
       }
 
       .letter-body:focus {
         outline: none;
-        background: rgba(250, 242, 225, 0.55);
+        background: rgba(250, 242, 225, 0.08);
       }
 
       .letter-body::placeholder {
@@ -601,14 +601,9 @@
         cursor: grabbing;
       }
 
+      /* Removed the shadow overlay that was causing the line */
       .letter-sheet::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: 6px;
-        background: rgba(0, 0, 0, 0.18);
-        pointer-events: none;
-        z-index: 1;
+        display: none;
       }
 
       .letter-sheet::after {
@@ -619,7 +614,7 @@
         pointer-events: none;
         opacity: 0.15;
         mix-blend-mode: multiply;
-        background-image: url("dta:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
         z-index: 2;
       }
 
