@@ -50,7 +50,7 @@ function M.get_witness_response(letter, recipient)
     },
     generationConfig = {
       temperature = 0.9,
-      maxOutputTokens = 200
+      maxOutputTokens = 500
     }
   })
 
