@@ -1027,7 +1027,6 @@
               autocomplete="off"
             />
           </div>
-          <div class="letter-date" id="letterDate">This evening</div>
         </div>
 
         <div class="textarea-wrapper">
@@ -1269,21 +1268,6 @@ Just write."
           runPlaceholderCycle();
         }
       });
-
-      function setDate() {
-        const now = new Date();
-        const hour = now.getHours();
-        if (hour >= 22 || hour < 5) {
-          letterDate.textContent = "Tonight";
-        } else if (hour < 12) {
-          letterDate.textContent = "This morning";
-        } else if (hour < 17) {
-          letterDate.textContent = "This afternoon";
-        } else {
-          letterDate.textContent = "This evening";
-        }
-      }
-      setDate();
 
       function addHeartBulge(e) {
         e.stopPropagation();
