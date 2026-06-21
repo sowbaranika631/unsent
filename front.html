@@ -1093,7 +1093,7 @@ Just write."
       const recipient = document.getElementById("recipient");
       const letterBody = document.getElementById("letterBody");
       const sealBtn = document.getElementById("sealBtn");
-      const letterDate = document.getElementById("letterDate");
+      const letterDate = null;
       const letterSheet = document.querySelector(".letter-sheet");
       const waxSealHeart = document.getElementById("waxSealHeart");
       const ropeScrollbar = document.getElementById("ropeScrollbar");
@@ -1459,7 +1459,6 @@ Just write."
         letterBody.value = "";
         salutationInserted = false;
         sealBtn.disabled = false;
-        setDate();
         letterSheet.style.transition = "none";
         letterSheet.style.transform = "";
         letterSheet.style.opacity = "";
