@@ -5,7 +5,7 @@ local ltn12 = require "ltn12"
 local cjson = require "cjson"
 
 local GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-local MODEL = "gemini-2.0-flash"
+local MODEL = "gemini-2.5-flash"
 
 local SYSTEM_PROMPT = [[
 You are a silent witness reading a letter someone could never send.
