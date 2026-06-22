@@ -68,9 +68,10 @@ end
 local cjson = require "cjson"
 
 -- ── Main server loop ────────────────────────────────────────────────────
-local server = assert(socket.bind("0.0.0.0", tonumber(os.getenv("PORT")) or 8080))
+local PORT = tonumber(os.getenv("PORT")) or 10000
+local server = assert(socket.bind("0.0.0.0", PORT))
 server:settimeout(0)
-print("UNSENT server running on port " .. (os.getenv("PORT") or "8080"))
+print("UNSENT server running on port " .. PORT)
 
 local clients = {}
 

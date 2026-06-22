@@ -16,8 +16,8 @@ RUN luarocks install lua-cjson
 RUN luarocks install luasql-sqlite3
 
 WORKDIR /app
-COPY server.lua .
+COPY backend/server.lua .
 COPY backend/gemini.lua .
 
-EXPOSE 8080
+EXPOSE 10000
 CMD ["lua5.1", "server.lua"]
