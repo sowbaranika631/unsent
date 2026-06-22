@@ -3,6 +3,8 @@ local socket = require "socket"
 local cjson = require "cjson"
 local gemini = require "gemini"
 
+io.stdout:setvbuf("no")
+
 local function trim(s)
   return s:match("^%s*(.-)%s*$")
 end
