@@ -17,7 +17,7 @@ RUN luarocks install luasql-sqlite3
 
 WORKDIR /app
 COPY server.lua .
-COPY gemini.lua .
+COPY backend/gemini.lua .
 
 EXPOSE 8080
 CMD ["lua5.1", "server.lua"]
