@@ -79,7 +79,7 @@ while true do
   -- accept new connections
   local client = server:accept()
   if client then
-    client:settimeout(5)
+    client:settimeout(60)
     table.insert(clients, client)
   end
 
