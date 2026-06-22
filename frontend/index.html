@@ -766,10 +766,14 @@
       /* ============ SCENE 3: WITNESS ============ */
 
       #scene-witness {
-        flex-direction: column;
+        lex-direction: column;
         text-align: center;
-        gap: 28px;
+        gap: 20px;
         padding: 40px 28px;
+        overflow-y: auto;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 60px;
       }
 
       .candle {
@@ -809,12 +813,11 @@
         text-transform: uppercase;
         color: var(--ash-dim);
       }
-
       .witness-text {
         font-family: var(--display);
         font-style: italic;
-        font-size: clamp(20px, 4vw, 28px);
-        line-height: 1.7;
+        font-size: clamp(16px, 3vw, 22px);
+        line-height: 1.8;
         color: #f3ece0;
         max-width: 640px;
         min-height: 1.7em;
