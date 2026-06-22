@@ -766,7 +766,7 @@
       /* ============ SCENE 3: WITNESS ============ */
 
       #scene-witness {
-        lex-direction: column;
+        flex-direction: column;
         text-align: center;
         gap: 20px;
         padding: 40px 28px;
@@ -1411,6 +1411,7 @@ Just write."
 
         try {
           const res = await fetch(API_URL, {
+            signal: AbortSignal.timeout(30000),
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
