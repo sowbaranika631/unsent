@@ -305,48 +305,6 @@ function typewrite(text, el, speed = 32) {
   });
 }
 
-// Reads a streamed fetch Response chunk by chunk and appends each chunk
-// into `el` as it arrives, keeping the same blinking cursor look as
-// typewrite() above. Falls back to a default line if nothing streams in.
-async function streamWitnessResponse(res, el) {
-  el.innerHTML = '<span class="cursor"></span>';
-  const cursor = el.querySelector(".cursor");
-  let received = "";
-
-  if (!res.body || !res.body.getReader) {
-    // Environment without streaming support — fall back to a full read.
-    const data = await res.json().catch(() => null);
-    const fallback =
-      (data && data.response) ||
-      "Some things are heard simply by being written down.";
-    cursor.remove();
-    await typewrite(fallback, el);
-    return;
-  }
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    const chunk = decoder.decode(value, { stream: true });
-    if (chunk) {
-      received += chunk;
-      cursor.insertAdjacentText("beforebegin", chunk);
-    }
-  }
-
-  if (!received.trim()) {
-    cursor.insertAdjacentText(
-      "beforebegin",
-      "Some things are heard simply by being written down.",
-    );
-  }
-
-  cursor.remove();
-}
-
 sealBtn.addEventListener("click", async () => {
   const text = letterBody.value.trim();
   if (!text) {
@@ -379,10 +337,13 @@ sealBtn.addEventListener("click", async () => {
     });
 
     if (!res.ok) throw new Error("request failed");
+    const data = await res.json();
+    const response =
+      data.response || "Some things are heard simply by being written down.";
 
     setTimeout(async () => {
       listening.classList.remove("visible");
-      await streamWitnessResponse(res, witnessText);
+      await typewrite(response, witnessText);
 
       setTimeout(() => {
         witnessAfter.classList.add("visible");
