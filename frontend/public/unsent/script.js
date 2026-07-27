@@ -1,4 +1,4 @@
-const API_URL = "http://172.22.34.78:5000/letter";
+const API_URL = "http://localhost:5000/letter";
 const placeholders = [
   "someone you lost",
   "someone who hurt you",
