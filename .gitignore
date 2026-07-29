@@ -3,4 +3,4 @@ venv/
 __pycache__/
 *.pyc
 unsent.db
-test_gemini.luaunsent.db
+*.lua
