@@ -109,7 +109,7 @@ def receive_letter():
                     {"role": "user", "content": full_letter}
                 ],
                 stream=True,
-                max_tokens=200,
+                max_tokens=1024,
                 temperature=0.7
             )
             chunk_count = 0
@@ -138,4 +138,5 @@ def receive_letter():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
