@@ -77,9 +77,12 @@ def health():
     return jsonify({"status": "ok"})
 
 
-@app.route("/letter", methods=["POST"])
+@app.route("/letter", methods=["POST", "OPTIONS"])
 def receive_letter():
-    data = request.get_json()
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    data = request.get_json(silent=True)
     if not data:
         return jsonify({"error": "no data"}), 400
 
@@ -87,34 +90,44 @@ def receive_letter():
     recipient = data.get("to", "").strip()
 
     if not letter_text:
-        return jsonify({"error": "empty letter"}), 400
+        return jsonify({"error": "missing letter text"}), 400
 
-    # Store in Redis with 60 second TTL — letter self-destructs
     letter_id = str(uuid.uuid4())
     full_letter = f"Dear {recipient},\n\n{letter_text}" if recipient else letter_text
-    redis_client.set(f"letter:{letter_id}", full_letter, ex=60)
 
-    # Call Groq with streaming
-def generate():
     try:
-        stream = groq_client.chat.completions.create(
-            model="openai/gpt-oss-20b",
-            messages=[
-                {"role": "system", "content": WITNESS_PROMPT},
-                {"role": "user", "content": full_letter}
-            ],
-            stream=True,
-            max_tokens=200,
-            temperature=0.7
-        )
-        for chunk in stream:
-            if not chunk.choices:
-                continue
-            delta = chunk.choices[0].delta
-            if hasattr(delta, 'content') and delta.content is not None:
-                yield delta.content
-    finally:
-        redis_client.delete(f"letter:{letter_id}")
+        redis_client.set(f"letter:{letter_id}", full_letter, ex=60)
+    except Exception as e:
+        print(f"Redis error: {e}")
+
+    def generate():
+        try:
+            stream = groq_client.chat.completions.create(
+                model="openai/gpt-oss-20b",
+                messages=[
+                    {"role": "system", "content": WITNESS_PROMPT},
+                    {"role": "user", "content": full_letter}
+                ],
+                stream=True,
+                max_tokens=200,
+                temperature=0.7
+            )
+            for chunk in stream:
+                if not chunk.choices:
+                    continue
+                delta = chunk.choices[0].delta
+                if hasattr(delta, 'content') and delta.content is not None:
+                    yield delta.content
+        except Exception as e:
+            print(f"Groq error: {e}")
+            yield "Something kept this from reaching the witness. Try again when ready."
+        finally:
+            try:
+                redis_client.delete(f"letter:{letter_id}")
+            except Exception:
+                pass
+
+    return Response(stream_with_context(generate()), mimetype="text/plain")
 
 
 if __name__ == "__main__":
