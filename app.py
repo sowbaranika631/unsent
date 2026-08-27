@@ -95,7 +95,8 @@ def receive_letter():
     redis_client.set(f"letter:{letter_id}", full_letter, ex=60)
 
     # Call Groq with streaming
-    def generate():
+def generate():
+    try:
         stream = groq_client.chat.completions.create(
             model="openai/gpt-oss-20b",
             messages=[
@@ -107,14 +108,13 @@ def receive_letter():
             temperature=0.7
         )
         for chunk in stream:
-            delta = chunk.choices[0].delta.content
-            if delta:
-                yield delta
-
-        # Delete from Redis immediately after witness reads
+            if not chunk.choices:
+                continue
+            delta = chunk.choices[0].delta
+            if hasattr(delta, 'content') and delta.content is not None:
+                yield delta.content
+    finally:
         redis_client.delete(f"letter:{letter_id}")
-
-    return Response(stream_with_context(generate()), mimetype="text/plain")
 
 
 if __name__ == "__main__":
