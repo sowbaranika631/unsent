@@ -121,6 +121,7 @@ def receive_letter():
                 delta = chunk.choices[0].delta
                 if hasattr(delta, 'content') and delta.content is not None:
                     content_count += 1
+                    print(f"CONTENT CHUNK: {repr(delta.content)}", flush=True)
                     yield delta.content
             print(f"DEBUG: total chunks={chunk_count}, content chunks={content_count}", flush=True)
         except Exception as e:
@@ -137,3 +138,4 @@ def receive_letter():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
