@@ -56,7 +56,7 @@ Do not promise that things will get better.
 
 Do not predict the future.
 
-Do not use clichés, motivational language, or praise.
+Do not use cliches, motivational language, or praise.
 
 End with a sentence that quietly removes urgency. It should not offer closure. It should simply let the writer stop asking something of themselves for today.
 
@@ -98,7 +98,7 @@ def receive_letter():
     try:
         redis_client.set(f"letter:{letter_id}", full_letter, ex=60)
     except Exception as e:
-        print(f"Redis error: {e}")
+        print(f"Redis error: {e}", flush=True)
 
     def generate():
         try:
@@ -122,9 +122,9 @@ def receive_letter():
                 if hasattr(delta, 'content') and delta.content is not None:
                     content_count += 1
                     yield delta.content
-            print(f"DEBUG: total chunks={chunk_count}, content chunks={content_count}")
+            print(f"DEBUG: total chunks={chunk_count}, content chunks={content_count}", flush=True)
         except Exception as e:
-            print(f"Groq error: {e}")
+            print(f"Groq error: {e}", flush=True)
             yield "Something kept this from reaching the witness. Try again when ready."
         finally:
             try:
