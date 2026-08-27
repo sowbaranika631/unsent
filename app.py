@@ -1,4 +1,4 @@
-import os
+﻿import os
 import uuid
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
@@ -101,36 +101,36 @@ def receive_letter():
         print(f"Redis error: {e}")
 
     def generate():
-    try:
-        stream = groq_client.chat.completions.create(
-            model="openai/gpt-oss-20b",
-            messages=[
-                {"role": "system", "content": WITNESS_PROMPT},
-                {"role": "user", "content": full_letter}
-            ],
-            stream=True,
-            max_tokens=200,
-            temperature=0.7
-        )
-        chunk_count = 0
-        content_count = 0
-        for chunk in stream:
-            chunk_count += 1
-            if not chunk.choices:
-                continue
-            delta = chunk.choices[0].delta
-            if hasattr(delta, 'content') and delta.content is not None:
-                content_count += 1
-                yield delta.content
-        print(f"DEBUG: total chunks={chunk_count}, content chunks={content_count}")
-    except Exception as e:
-        print(f"Groq error: {e}")
-        yield "Something kept this from reaching the witness. Try again when ready."
-    finally:
         try:
-            redis_client.delete(f"letter:{letter_id}")
-        except Exception:
-            pass
+            stream = groq_client.chat.completions.create(
+                model="openai/gpt-oss-20b",
+                messages=[
+                    {"role": "system", "content": WITNESS_PROMPT},
+                    {"role": "user", "content": full_letter}
+                ],
+                stream=True,
+                max_tokens=200,
+                temperature=0.7
+            )
+            chunk_count = 0
+            content_count = 0
+            for chunk in stream:
+                chunk_count += 1
+                if not chunk.choices:
+                    continue
+                delta = chunk.choices[0].delta
+                if hasattr(delta, 'content') and delta.content is not None:
+                    content_count += 1
+                    yield delta.content
+            print(f"DEBUG: total chunks={chunk_count}, content chunks={content_count}")
+        except Exception as e:
+            print(f"Groq error: {e}")
+            yield "Something kept this from reaching the witness. Try again when ready."
+        finally:
+            try:
+                redis_client.delete(f"letter:{letter_id}")
+            except Exception:
+                pass
 
     return Response(stream_with_context(generate()), mimetype="text/plain")
 
